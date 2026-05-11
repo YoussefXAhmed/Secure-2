@@ -9,7 +9,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-mongoose.connect('mongodb://127.0.0.1:27017/password_manager')
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/password_manager')
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.log(err));
 
@@ -44,20 +44,30 @@ const auth = (req, res, next) => {
 // Signup
 app.post('/signup', async (req, res) => {
   const { email, password } = req.body;
+  
+  const existingUser = await User.findOne({ email });
+  if (existingUser) return res.status(400).json({ error: 'Email already registered' });
+  
+  if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
+  if (password.length < 8) return res.status(400).json({ error: 'Password must be at least 8 characters' });
+  
   const hashed = await bcrypt.hash(password, 10);
   const user = await User.create({ email, password: hashed });
-  res.json(user);
+  res.status(201).json(user);
 });
 
 // Login
 app.post('/login', async (req, res) => {
   const { email, password } = req.body;
+  
+  if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
+  
   const user = await User.findOne({ email });
 
-  if (!user) return res.status(400).send('User not found');
+  if (!user) return res.status(400).json({ error: 'User not found' });
 
   const match = await bcrypt.compare(password, user.password);
-  if (!match) return res.status(400).send('Wrong password');
+  if (!match) return res.status(400).json({ error: 'Wrong password' });
 
   const token = jwt.sign({ id: user._id }, 'secret123');
   res.json({ token });
@@ -67,17 +77,21 @@ app.post('/login', async (req, res) => {
 app.put('/change-password', auth, async (req, res) => {
   const { oldPassword, newPassword } = req.body;
 
+  if (!oldPassword || !newPassword) return res.status(400).json({ error: 'Both passwords required' });
+  if (newPassword.length < 8) return res.status(400).json({ error: 'New password must be at least 8 characters' });
+
   const user = await User.findById(req.userId);
+  if (!user) return res.status(404).json({ error: 'User not found' });
 
   const match = await bcrypt.compare(oldPassword, user.password);
-  if (!match) return res.status(400).send('Wrong old password');
+  if (!match) return res.status(400).json({ error: 'Wrong old password' });
 
   const hashed = await bcrypt.hash(newPassword, 10);
 
   user.password = hashed;
   await user.save();
 
-  res.send('Password updated');
+  res.json({ message: 'Password updated' });
 });
 
 // Get passwords
@@ -113,4 +127,13 @@ app.put('/restore/:id', auth, async (req, res) => {
   res.send('Restored');
 });
 
-app.listen(5000, () => console.log('Server running on http://16.170.159.191:5000'));
+// Profile
+app.get('/profile', auth, async (req, res) => {
+  const user = await User.findById(req.userId).select('-password');
+  if (!user) return res.status(404).json({ error: 'User not found' });
+  res.json(user);
+});
+
+app.listen(5000, () => {
+  console.log("Server running on port 5000");
+});

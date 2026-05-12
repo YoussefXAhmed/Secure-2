@@ -1,14 +1,14 @@
 
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import Layout from '../Layout';
 import toast from 'react-hot-toast';
 
-const API = "http://localhost:5000";
+const API = 'http://localhost:5000';
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState(null);
   const [name, setName]       = useState('');
+  const [photo, setPhoto]     = useState('');
   const [stats, setStats]     = useState({ total: 0, trashed: 0 });
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -22,10 +22,27 @@ export default function ProfilePage() {
     ]).then(([p, pw, tr]) => {
       setProfile(p.data);
       setName(p.data.name || '');
+      setPhoto(p.data.photo || '');
       setStats({ total: pw.data.length, trashed: tr.data.length });
     }).catch(() => toast.error('Failed to load profile'))
       .finally(() => setLoading(false));
   }, []);
+
+  const handlePhoto = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+      const base64 = ev.target.result;
+      setPhoto(base64);
+      try {
+        await axios.put(`${API}/profile`, { photo: base64 }, { headers: { authorization: token } });
+        setProfile(p => ({ ...p, photo: base64 }));
+        toast.success('Photo updated ✓');
+      } catch { toast.error('Photo upload failed'); }
+    };
+    reader.readAsDataURL(file);
+  };
 
   const save = async () => {
     try {
@@ -36,18 +53,16 @@ export default function ProfilePage() {
     } catch { toast.error('Update failed'); }
   };
 
+  const avatarSrc = photo || profile?.photo;
   const letter = name?.[0]?.toUpperCase() ?? profile?.email?.[0]?.toUpperCase() ?? '?';
 
   if (loading) return (
-    <Layout>
       <div className="flex items-center justify-center h-64">
         <div className="w-6 h-6 border-2 border-cyan-500/30 border-t-cyan-400 rounded-full animate-spin"/>
       </div>
-    </Layout>
   );
 
   return (
-    <Layout>
       <div style={{ fontFamily:"'DM Mono','Courier New',monospace" }}>
         <div className="mb-8">
           <p className="text-[10px] tracking-[0.3em] text-gray-600 uppercase mb-1">Account</p>
@@ -60,9 +75,15 @@ export default function ProfilePage() {
           <div className="bg-[#08090f]/90 backdrop-blur-xl border border-white/[0.07] rounded-2xl p-6">
             <div className="flex items-center gap-5">
               {/* Avatar */}
-              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-cyan-500/30 to-violet-500/30 border border-cyan-500/20 flex items-center justify-center text-3xl font-bold text-cyan-300 shadow-xl shadow-cyan-500/10 shrink-0">
-                {letter}
-              </div>
+              <label className="cursor-pointer group relative w-20 h-20 rounded-2xl bg-gradient-to-br from-cyan-500/30 to-violet-500/30 border border-cyan-500/20 flex items-center justify-center text-3xl font-bold text-cyan-300 shadow-xl shadow-cyan-500/10 shrink-0 overflow-hidden">
+                {avatarSrc ? (
+                  <img src={avatarSrc} alt="avatar" className="w-full h-full object-cover"/>
+                ) : letter}
+                <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <span className="text-[8px] text-white tracking-widest uppercase">Change</span>
+                </div>
+                <input type="file" accept="image/*" onChange={handlePhoto} className="hidden"/>
+              </label>
 
               <div className="flex-1 min-w-0">
                 {editing ? (
@@ -140,6 +161,5 @@ export default function ProfilePage() {
 
         </div>
       </div>
-    </Layout>
   );
 }

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import Layout from '../Layout';
+
 
 const tips = [
   {
@@ -70,7 +70,6 @@ export default function SecurityPage() {
   }, []);
 
   return (
-    <Layout>
       <div style={{ fontFamily:"'DM Mono','Courier New',monospace" }}>
         <div className="mb-8">
           <p className="text-[10px] tracking-[0.3em] text-gray-600 uppercase mb-1">Help</p>
@@ -145,6 +144,5 @@ export default function SecurityPage() {
           </ul>
         </div>
       </div>
-    </Layout>
   );
 }

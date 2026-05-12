@@ -22,6 +22,7 @@ const login = async () => {
     setError('');
     const res = await axios.post(`${API}/login`, { email, password });
     localStorage.setItem("token", res.data.token);
+    localStorage.setItem("role", res.data.role || 'user');
     nav("/dashboard");
   } catch (err) {
     setError(err.response?.data?.error || 'Login failed');

@@ -1,6 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
-import Layout from '../Layout';
 import toast from 'react-hot-toast';
 
 const API = "http://localhost:5000";
@@ -124,7 +123,6 @@ export default function VaultPage() {
   const strength = strengthInfo(form.password);
 
   return (
-    <Layout>
       <div style={{ fontFamily:"'DM Mono','Courier New',monospace" }}>
 
         {/* Header */}
@@ -373,6 +371,5 @@ export default function VaultPage() {
           </div>
         )}
       </div>
-    </Layout>
   );
 }

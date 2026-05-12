@@ -6,7 +6,7 @@ const cors = require('cors');
 
 const app = express(); 
 
-app.use(express.json());
+app.use(express.json({ limit: '5mb' }));
 app.use(cors());
 
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/password_manager')
@@ -16,7 +16,10 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/password_
 // Models
 const User = mongoose.model('User', {
   email: String,
-  password: String
+  password: String,
+  name: { type: String, default: '' },
+  photo: { type: String, default: '' },
+  role: { type: String, default: 'user' }
 });
 
 const Password = mongoose.model('Password', {
@@ -41,6 +44,13 @@ const auth = (req, res, next) => {
   }
 };
 
+// Admin Middleware
+const admin = async (req, res, next) => {
+  const user = await User.findById(req.userId);
+  if (!user || user.role !== 'admin') return res.status(403).json({ error: 'Admin access required' });
+  next();
+};
+
 // Signup
 app.post('/signup', async (req, res) => {
   const { email, password } = req.body;
@@ -53,7 +63,7 @@ app.post('/signup', async (req, res) => {
   
   const hashed = await bcrypt.hash(password, 10);
   const user = await User.create({ email, password: hashed });
-  res.status(201).json(user);
+  res.status(201).json({ email: user.email, name: user.name });
 });
 
 // Login
@@ -69,8 +79,8 @@ app.post('/login', async (req, res) => {
   const match = await bcrypt.compare(password, user.password);
   if (!match) return res.status(400).json({ error: 'Wrong password' });
 
-  const token = jwt.sign({ id: user._id }, 'secret123');
-  res.json({ token });
+  const token = jwt.sign({ id: user._id, role: user.role }, 'secret123');
+  res.json({ token, role: user.role });
 });
 
 // Change Password
@@ -132,6 +142,49 @@ app.get('/profile', auth, async (req, res) => {
   const user = await User.findById(req.userId).select('-password');
   if (!user) return res.status(404).json({ error: 'User not found' });
   res.json(user);
+});
+
+app.put('/profile', auth, async (req, res) => {
+  const { name, photo } = req.body;
+  const update = {};
+  if (name !== undefined) update.name = name;
+  if (photo !== undefined) update.photo = photo;
+  const user = await User.findByIdAndUpdate(req.userId, update, { new: true }).select('-password');
+  if (!user) return res.status(404).json({ error: 'User not found' });
+  res.json(user);
+});
+
+// Setup first admin (call once)
+app.post('/setup-admin', async (req, res) => {
+  const { email, secret } = req.body;
+  if (secret !== 'admin-setup-secret') return res.status(403).json({ error: 'Invalid secret' });
+  const user = await User.findOneAndUpdate({ email }, { role: 'admin' }, { new: true }).select('-password');
+  if (!user) return res.status(404).json({ error: 'User not found' });
+  res.json({ message: 'Admin role assigned', user });
+});
+
+// ===== Admin Routes =====
+app.get('/admin/users', auth, admin, async (req, res) => {
+  const users = await User.find().select('-password');
+  res.json(users);
+});
+
+app.delete('/admin/users/:id', auth, admin, async (req, res) => {
+  await User.findByIdAndDelete(req.params.id);
+  await Password.deleteMany({ userId: req.params.id });
+  res.json({ message: 'User deleted' });
+});
+
+app.put('/admin/users/:id/role', auth, admin, async (req, res) => {
+  const { role } = req.body;
+  if (!['user', 'admin'].includes(role)) return res.status(400).json({ error: 'Invalid role' });
+  const user = await User.findByIdAndUpdate(req.params.id, { role }, { new: true }).select('-password');
+  res.json(user);
+});
+
+app.get('/admin/all-passwords', auth, admin, async (req, res) => {
+  const data = await Password.find();
+  res.json(data);
 });
 
 app.listen(5000, () => {

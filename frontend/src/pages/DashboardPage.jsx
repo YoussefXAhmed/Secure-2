@@ -1,7 +1,5 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import Layout from '../Layout';
-
 const API = "http://localhost:5000";
 
 function StatCard({ label, value, accent = 'cyan' }) {
@@ -41,7 +39,6 @@ export default function DashboardPage() {
   const visibleCount = Object.values(show).filter(Boolean).length;
 
   return (
-    <Layout>
       <div className="text-white" style={{ fontFamily:"'DM Mono','Courier New',monospace" }}>
 
         {/* Header */}
@@ -120,6 +117,5 @@ export default function DashboardPage() {
           </div>
         )}
       </div>
-    </Layout>
   );
 }

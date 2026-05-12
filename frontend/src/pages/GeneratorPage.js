@@ -1,5 +1,4 @@
 import { useState, useCallback } from 'react';
-import Layout from '../Layout';
 import toast from 'react-hot-toast';
 
 function generatePassword(length, opts) {
@@ -81,7 +80,6 @@ export default function GeneratorPage() {
   const strength = getStrength(password);
 
   return (
-    <Layout>
       <div style={{ fontFamily:"'DM Mono','Courier New',monospace" }}>
         <div className="mb-8">
           <p className="text-[10px] tracking-[0.3em] text-gray-600 uppercase mb-1">Tools</p>
@@ -181,6 +179,5 @@ export default function GeneratorPage() {
           </div>
         </div>
       </div>
-    </Layout>
   );
 }

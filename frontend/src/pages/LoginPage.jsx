@@ -72,7 +72,7 @@ const login = async () => {
           {/* Logo */}
           <div className="text-center mb-8">
             <div className="inline-flex w-14 h-14 bg-gradient-to-br from-cyan-400 to-violet-500 rounded-2xl items-center justify-center text-2xl font-black text-black shadow-xl shadow-cyan-500/20 mb-4">S</div>
-            <h1 className="text-xl font-bold tracking-[0.15em] text-white">SECURE VAULT</h1>
+            <h1 className="text-xl font-bold tracking-[0.15em] text-white">SECURE</h1>
             <p className="text-xs text-gray-500 tracking-[0.2em] mt-1">AUTHENTICATE TO CONTINUE</p>
           </div>
 

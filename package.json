@@ -1,9 +1,11 @@
 {
+  "name": "secure2",
+  "version": "1.0.0",
+  "homepage": "https://YoussefXAhmed.github.io/password-manager",
   "devDependencies": {
     "autoprefixer": "^10.4.27",
     "gh-pages": "^6.3.0",
     "postcss": "^8.5.8",
-    "homepage": "https://YoussefXAhmed.github.io/password-manager",
     "tailwindcss": "^3.4.0"
   },
   "dependencies": {

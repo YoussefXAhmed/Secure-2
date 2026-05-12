@@ -116,6 +116,102 @@ http://localhost:3000
 
 ---
 
+## 🚢 Deployment
+
+### Prerequisites
+
+- [MongoDB Atlas](https://www.mongodb.com/atlas) account (free tier)
+- [Render](https://render.com) account
+- [Vercel](https://vercel.com) account
+
+---
+
+### 1. MongoDB Atlas Setup
+
+1. Go to [MongoDB Atlas](https://www.mongodb.com/atlas), create a free cluster
+2. Under **Database Access** → create a database user (username + password)
+3. Under **Network Access** → add `0.0.0.0/0` to allow access from anywhere
+4. Click **Connect** → **Drivers** → copy your connection string (`mongodb+srv://<user>:<password>@cluster0.xxxxx.mongodb.net/`)
+5. Append `/password_manager` as the database name
+
+---
+
+### 2. Backend — Deploy to Render
+
+1. Push the repo to GitHub
+2. In [Render Dashboard](https://dashboard.render.com) → **New** → **Web Service**
+3. Connect your GitHub repo
+4. Use these settings:
+
+| Setting | Value |
+|---|---|
+| **Name** | `secure2-backend` |
+| **Root Directory** | `backend` |
+| **Environment** | `Node` |
+| **Build Command** | `npm install` |
+| **Start Command** | `npm start` |
+| **Plan** | Free |
+
+5. Add these environment variables:
+
+| Key | Value |
+|---|---|
+| `MONGODB_URI` | Your MongoDB Atlas connection string (with `<password>` replaced) |
+| `JWT_SECRET` | A long random string (e.g., 64 chars) |
+| `ADMIN_SECRET` | A secret for the `/setup-admin` endpoint |
+
+6. Click **Create Web Service**
+7. After deployment, copy the URL (e.g., `https://secure2-backend.onrender.com`)
+
+#### Setting up an admin user
+
+```bash
+curl -X POST https://your-backend.onrender.com/setup-admin \
+  -H "Content-Type: application/json" \
+  -d '{"email": "your@email.com", "secret": "your-admin-setup-secret"}'
+```
+
+---
+
+### 3. Frontend — Deploy to Vercel
+
+1. In [Vercel Dashboard](https://vercel.com) → **Add New** → **Project**
+2. Connect your GitHub repo
+3. Use these settings:
+
+| Setting | Value |
+|---|---|
+| **Root Directory** | `frontend` |
+| **Framework** | `Create React App` (auto-detected) |
+| **Build Command** | `npm run build` |
+| **Output Directory** | `build` |
+
+4. Add environment variable:
+
+| Key | Value |
+|---|---|
+| `REACT_APP_API_URL` | Your Render backend URL (e.g., `https://secure2-backend.onrender.com`) |
+
+5. Click **Deploy**
+
+> The `vercel.json` at the repo root automatically configures SPA routing (all paths → `index.html`).
+
+---
+
+### 4. Local Development After Deployment
+
+To switch between production and local:
+
+```bash
+# frontend/.env — leave empty to use localhost:5000
+REACT_APP_API_URL=
+
+# Or set it to your Render backend
+REACT_APP_API_URL=https://secure2-backend.onrender.com
+```
+
+---
+
 ## 📸 Preview
 
 Cyber-style dashboard with:

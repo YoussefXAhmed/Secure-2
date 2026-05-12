@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-const API = "http://localhost:5000";
+import API from '../api';
 
 function StatCard({ label, value, accent = 'cyan' }) {
   const colors = {

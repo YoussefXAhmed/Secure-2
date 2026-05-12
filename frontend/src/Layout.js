@@ -1,8 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-
-const API = 'http://localhost:5000';
+import API from './api';
 
 const navItems = [
   { path: '/dashboard', icon: '⬡', label: 'Dashboard'  },

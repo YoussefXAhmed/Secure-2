@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-
-const API = "http://localhost:5000";
+import API from '../api';
 
 function Field({ label, type = 'password', value, onChange, placeholder }) {
   const [show, setShow] = useState(false);

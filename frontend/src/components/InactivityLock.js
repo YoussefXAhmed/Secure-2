@@ -1,6 +1,8 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
+import axios from 'axios';
+import API from '../api';
 
-const IDLE_MINUTES = 5; // Lock after 5 minutes idle
+const IDLE_MINUTES = 5;
 
 export default function InactivityLock({ children }) {
   const [locked, setLocked]     = useState(false);
@@ -43,22 +45,19 @@ export default function InactivityLock({ children }) {
     };
   }, [isAuth, resetTimer]);
 
-  const unlock = () => {
-    // Simple unlock: re-enter master password or just confirm presence
-    // In production, verify against stored hash
-    if (pin.length < 1) return setError('Enter your password');
-    // For demo: check against a stored PIN or just any input unlocks
-    // Replace with real verification logic
-    const storedPin = localStorage.getItem('lockPin') || '';
-    if (storedPin && pin !== storedPin) {
+  const unlock = async () => {
+    if (!pin) return setError('Enter your password');
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post(`${API}/verify-password`, { password: pin }, { headers: { authorization: token } });
+      setLocked(false);
+      setPin('');
+      setError('');
+      resetTimer();
+    } catch {
       setError('Wrong password');
       setPin('');
-      return;
     }
-    setLocked(false);
-    setPin('');
-    setError('');
-    resetTimer();
   };
 
   const logout = () => {

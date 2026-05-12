@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: secure2-backend
+    env: node
+    region: ohio
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: ADMIN_SECRET
+        sync: false

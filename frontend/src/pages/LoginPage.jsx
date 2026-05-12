@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
-
-const API = "http://localhost:5000";
+import API from '../api';
 
 export default function LoginPage() {
   const [email, setEmail]       = useState('');

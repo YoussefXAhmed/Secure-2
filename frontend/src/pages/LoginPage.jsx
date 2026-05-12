@@ -37,6 +37,18 @@ const login = async () => {
     <div className="min-h-screen flex items-center justify-center bg-[#050508] relative overflow-hidden"
       style={{ fontFamily: "'DM Mono','Courier New',monospace" }}>
 
+      {/* Autofill override */}
+      <style>{`
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover,
+        input:-webkit-autofill:focus {
+          -webkit-box-shadow: 0 0 0 1000px rgba(8,9,15,0.95) inset !important;
+          -webkit-text-fill-color: #e2e8f0 !important;
+          caret-color: #e2e8f0 !important;
+          transition: background-color 5000s ease-in-out 0s !important;
+        }
+      `}</style>
+
       {/* Background */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-cyan-950/30 rounded-full blur-[130px]"/>
@@ -61,7 +73,7 @@ const login = async () => {
           {/* Logo */}
           <div className="text-center mb-8">
             <div className="inline-flex w-14 h-14 bg-gradient-to-br from-cyan-400 to-violet-500 rounded-2xl items-center justify-center text-2xl font-black text-black shadow-xl shadow-cyan-500/20 mb-4">S</div>
-            <h1 className="text-xl font-bold tracking-[0.15em]">SECURE VAULT</h1>
+            <h1 className="text-xl font-bold tracking-[0.15em] text-white">SECURE VAULT</h1>
             <p className="text-xs text-gray-500 tracking-[0.2em] mt-1">AUTHENTICATE TO CONTINUE</p>
           </div>
 
